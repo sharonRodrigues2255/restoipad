@@ -6,7 +6,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 Future<void> main() async {
   await Supabase.initialize(url: Urls.supabaseUrl, anonKey: Urls.supabaseKey);
-  runApp(ProviderScope(child: MyApp()));
+
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 class MyApp extends ConsumerWidget {
@@ -15,9 +16,20 @@ class MyApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp(
-      title: 'Restoadmin',
       debugShowCheckedModeBanner: false,
-      builder: (context, child) => SplashScreen(),
+      title: 'Indian Curry',
+      theme: ThemeData(
+        primaryColor: const Color(0xC09A5D),
+        scaffoldBackgroundColor: Colors.white,
+        textTheme: const TextTheme(
+          bodyLarge: TextStyle(color: Color(0x9C7147)),
+          bodyMedium: TextStyle(color: Color(0x9C7147)),
+        ),
+        colorScheme: ColorScheme.fromSwatch().copyWith(
+          secondary: const Color(0xC09A5D),
+        ),
+      ),
+      home: const SplashScreen(),
     );
   }
 }
