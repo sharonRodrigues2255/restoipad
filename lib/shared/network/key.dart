@@ -1,0 +1,2 @@
+const String superbaseKey =
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV2d2RxbnNxZ3hpb2Vya3h4bmhjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQwNjQxMDYsImV4cCI6MjA2OTY0MDEwNn0.hN4IbyPwOP-YC1JcEMyLiZnNPA9m_zsW2Q0jJAaW7v0';
