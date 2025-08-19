@@ -17,7 +17,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
 
     Future.delayed(Duration.zero, () async {
       try {
-        await ref.read(fetchProvider).fetchAndStoreAll();
+        await ref.read(fetchProvider).fetchAndStoreAll(context: context);
       } catch (e) {
         debugPrint('Fetch error: $e');
       }

@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ipadresto/controller/providers/shared_preference_fetch.dart';
@@ -65,98 +64,6 @@ class HomeScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(
-              height: 180,
-              child:
-                  specials.isEmpty
-                      ? Center(
-                        child: Text(
-                          'No Specials Available',
-                          style: TextStyle(color: kTextColor),
-                        ),
-                      )
-                      : ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: specials.length,
-                        itemBuilder: (context, index) {
-                          final special = specials[index];
-                          final now = TimeOfDay.now();
-                          bool isAvailable = true;
-
-                          // Check if current time is in special time range
-                          try {
-                            final startParts =
-                                special.startTime!
-                                    .split(':')
-                                    .map(int.parse)
-                                    .toList();
-                            final endParts =
-                                special.endTime!
-                                    .split(':')
-                                    .map(int.parse)
-                                    .toList();
-                            final start = TimeOfDay(
-                              hour: startParts[0],
-                              minute: startParts[1],
-                            );
-                            final end = TimeOfDay(
-                              hour: endParts[0],
-                              minute: endParts[1],
-                            );
-
-                            isAvailable = _isTimeInRange(now, start, end);
-                          } catch (e) {
-                            log('Error parsing special time: $e');
-                          }
-
-                          return Opacity(
-                            opacity: isAvailable ? 1.0 : 0.4,
-                            child: Card(
-                              color: kButtonColor,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              margin: const EdgeInsets.only(right: 12),
-                              child: Container(
-                                width: 220,
-                                padding: const EdgeInsets.all(16),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      special.title ?? '',
-                                      style: const TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      '${special.startTime} - ${special.endTime}',
-                                      style: const TextStyle(
-                                        fontSize: 14,
-                                        color: Colors.white70,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 12),
-                                    Expanded(
-                                      child: Text(
-                                        special.specialFor ?? '',
-                                        style: const TextStyle(
-                                          fontSize: 14,
-                                          color: Colors.white70,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-            ),
             const SizedBox(height: 24),
 
             // Categories Grid
@@ -203,13 +110,175 @@ class HomeScreen extends ConsumerWidget {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          // TODO: Open Specials Adding Page
-        },
-        backgroundColor: kButtonColor,
-        icon: const Icon(Icons.local_offer),
-        label: const Text('Add Special', style: TextStyle(color: Colors.white)),
+      floatingActionButton: Align(
+        alignment: Alignment.bottomRight,
+        child: SizedBox(
+          height: 220,
+          child:
+              specials.isEmpty
+                  ? Center(
+                    child: Text(
+                      'No Specials Available',
+                      style: TextStyle(
+                        color: kTextColor,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  )
+                  : ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: specials.length,
+                    itemBuilder: (context, index) {
+                      final special = specials[index];
+                      final now = TimeOfDay.now();
+                      bool isAvailable = true;
+
+                      // ✅ Parse timings safely
+                      try {
+                        final startParts =
+                            special.startTime
+                                .toString()
+                                .split(':')
+                                .map(int.parse)
+                                .toList();
+                        final endParts =
+                            special.endTime
+                                .toString()
+                                .split(':')
+                                .map(int.parse)
+                                .toList();
+
+                        final start = TimeOfDay(
+                          hour: startParts[0],
+                          minute: startParts[1],
+                        );
+                        final end = TimeOfDay(
+                          hour: endParts[0],
+                          minute: endParts[1],
+                        );
+
+                        isAvailable = _isTimeInRange(now, start, end);
+                      } catch (e) {
+                        debugPrint("Error parsing time: $e");
+                      }
+
+                      // ✅ Get background image (first product > next product > backup asset)
+                      String bgImage = 'assets/images/backupImage.png';
+
+                      if (special.products != null &&
+                          special.products!.isNotEmpty) {
+                        // First product image
+                        final firstImage = special.products![0].image;
+                        if (firstImage != null && firstImage.isNotEmpty) {
+                          bgImage = firstImage;
+                        }
+                        // Second product image fallback
+                        else if (special.products!.length > 1) {
+                          final secondImage = special.products![1].image;
+                          if (secondImage != null && secondImage.isNotEmpty) {
+                            bgImage = secondImage;
+                          }
+                        }
+                      }
+
+                      return Opacity(
+                        opacity: isAvailable ? 1.0 : 0.5,
+                        child: Container(
+                          width: 260,
+                          margin: const EdgeInsets.only(right: 16),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.3),
+                                blurRadius: 8,
+                                offset: const Offset(2, 4),
+                              ),
+                            ],
+                            image: DecorationImage(
+                              image:
+                                  bgImage.startsWith('http')
+                                      ? NetworkImage(bgImage)
+                                      : AssetImage(bgImage) as ImageProvider,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(20),
+                              gradient: LinearGradient(
+                                colors: [
+                                  Colors.black.withOpacity(0.7),
+                                  Colors.transparent,
+                                  Colors.black.withOpacity(0.6),
+                                ],
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                              ),
+                            ),
+                            padding: const EdgeInsets.all(16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Title
+                                Text(
+                                  special.title ?? '',
+                                  style: const TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                const Spacer(),
+
+                                // Time
+                                Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.access_time,
+                                      size: 16,
+                                      color: Colors.white,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      '${special.startTime} - ${special.endTime}',
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 6),
+
+                                Text(
+                                  _getAvailableDays(special.days ?? {}),
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    color: Colors.white,
+                                    fontStyle: FontStyle.italic,
+                                  ),
+                                ),
+                                const SizedBox(height: 10),
+                                Text(
+                                  special.specialFor ?? '',
+                                  style: const TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.white,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+        ),
       ),
     );
   }
@@ -226,4 +295,14 @@ class HomeScreen extends ConsumerWidget {
       return nowMinutes >= startMinutes || nowMinutes <= endMinutes;
     }
   }
+}
+
+// ✅ Helper for days formatting
+String _getAvailableDays(Map days) {
+  final available =
+      days.entries
+          .where((e) => e.value == true)
+          .map((e) => e.key.substring(0, 3))
+          .toList();
+  return available.isEmpty ? 'No days available' : available.join(', ');
 }

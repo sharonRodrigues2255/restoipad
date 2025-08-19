@@ -88,8 +88,9 @@ class FetchControllerController extends ChangeNotifier {
       log('Fetch and store error: $e');
       _showErrorSnackbar(context, 'Failed to fetch data');
     } finally {
-      loadFromSharedPrefs();
+      loadFromSharedPrefs(context: context);
       stopLoading();
+      notifyListeners();
     }
   }
 
@@ -99,7 +100,6 @@ class FetchControllerController extends ChangeNotifier {
     try {
       final prefs = await SharedPreferences.getInstance();
 
-      // Load products
       final productsJson = prefs.getString('products');
       if (productsJson != null) {
         final decoded = jsonDecode(productsJson) as List<dynamic>;
