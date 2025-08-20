@@ -1,6 +1,8 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ipadresto/controller/providers/shared_preference_fetch.dart';
+import 'package:ipadresto/view/product_listing.dart';
 
 // Color & Font constants
 const Color kButtonColor = Color(0xFFC09A5D);
@@ -31,7 +33,7 @@ class HomeScreen extends ConsumerWidget {
               DrawerHeader(
                 decoration: BoxDecoration(color: kButtonColor),
                 child: Text(
-                  'Menu',
+                  'Update New Data',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 24,
@@ -56,41 +58,157 @@ class HomeScreen extends ConsumerWidget {
       ),
       appBar: AppBar(
         backgroundColor: Colors.grey[850],
-        title: const Text('Home', style: TextStyle(color: kTextColor)),
+        title: Container(
+          height: 50,
+          width: 90,
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage('assets/images/splash.png'),
+              fit: BoxFit.cover,
+            ),
+          ),
+        ),
         iconTheme: const IconThemeData(color: kTextColor),
       ),
       body: Padding(
         padding: const EdgeInsets.all(kPadding),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 24),
-
-            // Categories Grid
-            Expanded(
-              child:
-                  categories.isEmpty
-                      ? Center(
-                        child: Text(
-                          'No Categories Available',
-                          style: TextStyle(color: kTextColor),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 70),
+              categories.isEmpty
+              ? Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(32.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.category_outlined,
+                        size: 100,
+                        color: Colors.grey.shade400,
+                      ),
+                      const SizedBox(height: 20),
+                      const Text(
+                        "No Categories Found",
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
                         ),
-                      )
-                      : GridView.builder(
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 3,
-                              mainAxisSpacing: 16,
-                              crossAxisSpacing: 16,
-                              childAspectRatio: 1.2,
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        "Start by adding categories to organize your menu items.",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+                      const SizedBox(height: 30),
+                      ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.deepOrange,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 12,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        icon: const Icon(Icons.add, color: Colors.white),
+                        label: const Text(
+                          "Add Category",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
+                        onPressed: () {
+                          Navigator.pushNamed(context, '/addcategory');
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ) : Center(
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: categories.length,
+                      itemBuilder: (context, index) {
+                        final category = categories[index];
+
+                        // ✅ get first product image safely
+                        String bgImage = 'assets/images/backupImage.png';
+                        if (category['products'] != null &&
+                            category['products'].isNotEmpty &&
+                            category['products'][0]['image'] != null &&
+                            category['products'][0]['image']
+                                .toString()
+                                .isNotEmpty) {
+                          bgImage = category['products'][0]['image'];
+                        }
+
+                        return InkWell(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder:
+                                    (context) => ProductListing(
+                                      isSpecial: false,
+                                      products:
+                                          ref
+                                              .watch(fetchProvider)
+                                              .productModel
+                                              .where(
+                                                (product) =>
+                                                    product.category ==
+                                                    category['title'],
+                                              )
+                                              .toList(),
+                                      index: index,
+                                      categories:
+                                          ref
+                                              .watch(fetchProvider)
+                                              .categoryModel,
+                                    ),
+                              ),
+                            );
+                          },
+                          child: Container(
+                            margin: const EdgeInsets.symmetric(
+                              vertical: 8,
+                              horizontal: 7,
                             ),
-                        itemCount: categories.length,
-                        itemBuilder: (context, index) {
-                          final category = categories[index];
-                          return Card(
-                            color: kButtonColor,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
+                            height: 100, // good height for cover effect
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(20),
+                              image: DecorationImage(
+                                image:
+                                    bgImage.startsWith('http')
+                                        ? NetworkImage(bgImage)
+                                        : AssetImage(bgImage) as ImageProvider,
+                                fit: BoxFit.cover, // cover effect
+                                colorFilter: ColorFilter.mode(
+                                  Colors.black.withOpacity(
+                                    0.4,
+                                  ), // dark overlay for readability
+                                  BlendMode.darken,
+                                ),
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black26,
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 5),
+                                ),
+                              ],
                             ),
                             child: Center(
                               child: Text(
@@ -98,30 +216,42 @@ class HomeScreen extends ConsumerWidget {
                                 textAlign: TextAlign.center,
                                 style: const TextStyle(
                                   color: Colors.white,
-                                  fontSize: 16,
+                                  fontSize: 22,
                                   fontWeight: FontWeight.bold,
+                                  shadows: [
+                                    Shadow(
+                                      color: Colors.black54,
+                                      blurRadius: 6,
+                                      offset: Offset(2, 2),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),
-                          );
-                        },
-                      ),
-            ),
-          ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+            ],
+          ),
         ),
       ),
-      floatingActionButton: Align(
-        alignment: Alignment.bottomRight,
-        child: SizedBox(
-          height: 220,
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(100)),
+          height: 320,
+          width: 320,
           child:
               specials.isEmpty
-                  ? Center(
+                  ? const Center(
                     child: Text(
                       'No Specials Available',
                       style: TextStyle(
-                        color: kTextColor,
-                        fontSize: 16,
+                        color: Colors.black54,
+                        fontSize: 18,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -134,7 +264,7 @@ class HomeScreen extends ConsumerWidget {
                       final now = TimeOfDay.now();
                       bool isAvailable = true;
 
-                      // ✅ Parse timings safely
+                      // ✅ Time range check
                       try {
                         final startParts =
                             special.startTime
@@ -163,116 +293,140 @@ class HomeScreen extends ConsumerWidget {
                         debugPrint("Error parsing time: $e");
                       }
 
-                      // ✅ Get background image (first product > next product > backup asset)
-                      String bgImage = 'assets/images/backupImage.png';
-
-                      if (special.products != null &&
-                          special.products!.isNotEmpty) {
-                        // First product image
-                        final firstImage = special.products![0].image;
-                        if (firstImage != null && firstImage.isNotEmpty) {
-                          bgImage = firstImage;
-                        }
-                        // Second product image fallback
-                        else if (special.products!.length > 1) {
-                          final secondImage = special.products![1].image;
-                          if (secondImage != null && secondImage.isNotEmpty) {
-                            bgImage = secondImage;
-                          }
-                        }
-                      }
-
-                      return Opacity(
-                        opacity: isAvailable ? 1.0 : 0.5,
-                        child: Container(
-                          width: 260,
-                          margin: const EdgeInsets.only(right: 16),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.3),
-                                blurRadius: 8,
-                                offset: const Offset(2, 4),
-                              ),
-                            ],
-                            image: DecorationImage(
-                              image:
-                                  bgImage.startsWith('http')
-                                      ? NetworkImage(bgImage)
-                                      : AssetImage(bgImage) as ImageProvider,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(20),
-                              gradient: LinearGradient(
-                                colors: [
-                                  Colors.black.withOpacity(0.7),
-                                  Colors.transparent,
-                                  Colors.black.withOpacity(0.6),
-                                ],
-                                begin: Alignment.topCenter,
-                                end: Alignment.bottomCenter,
-                              ),
-                            ),
-                            padding: const EdgeInsets.all(16),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // Title
-                                Text(
-                                  special.title ?? '',
-                                  style: const TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
+                      return InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (context) => ProductListing(
+                                    categories: [],
+                                    index: 0,
+                                    isSpecial: true,
+                                    special: {"title": special.title},
+                                    products: special.products ?? [],
                                   ),
-                                ),
-                                const Spacer(),
+                            ),
+                          );
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 15),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              // 🏷 Fancy Gradient Title
+                              // Days text
+                              const SizedBox(height: 10),
 
-                                // Time
-                                Row(
-                                  children: [
-                                    const Icon(
+                              // Time Row (Fancy style)
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(6),
+                                    decoration: BoxDecoration(
+                                      color: Colors.orangeAccent.withOpacity(
+                                        0.15,
+                                      ),
+                                      borderRadius: BorderRadius.circular(30),
+                                    ),
+                                    child: const Icon(
                                       Icons.access_time,
-                                      size: 16,
+                                      size: 20,
                                       color: Colors.white,
                                     ),
-                                    const SizedBox(width: 6),
-                                    Text(
-                                      '${special.startTime} - ${special.endTime}',
-                                      style: const TextStyle(
-                                        fontSize: 14,
-                                        color: Colors.white,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    "${special.startTime} - ${special.endTime}",
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 6),
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(18),
+                                child: CachedNetworkImage(
+                                  imageUrl: special.products?.first.image ?? '',
+                                  height: 100,
+                                  width: 120,
+                                  fit: BoxFit.cover,
+                                  placeholder:
+                                      (context, url) => Container(
+                                        height: 100,
+                                        width: 120,
+                                        color: Colors.grey[200],
+                                        child: const Center(
+                                          child: CircularProgressIndicator(),
+                                        ),
                                       ),
+                                  errorWidget:
+                                      (context, url, error) => Image.asset(
+                                        "assets/images/specials.png",
+                                        height: 100,
+                                        width: 120,
+                                        fit: BoxFit.cover,
+                                      ),
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                special.title ?? "Special Dish",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 40,
+                                  fontWeight: FontWeight.bold,
+                                  foreground:
+                                      Paint()
+                                        ..shader = LinearGradient(
+                                          colors: [
+                                            Colors.deepOrange,
+                                            Colors.orangeAccent,
+                                          ],
+                                        ).createShader(
+                                          const Rect.fromLTWH(0, 0, 200, 70),
+                                        ),
+                                  shadows: [
+                                    Shadow(
+                                      blurRadius: 6,
+                                      color: Colors.black.withOpacity(0.3),
+                                      offset: const Offset(2, 2),
                                     ),
                                   ],
                                 ),
-                                const SizedBox(height: 6),
+                              ),
+                              SizedBox(height: 8),
+                              Text(
+                                _getAvailableDays(special.days ?? {}),
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontStyle: FontStyle.italic,
+                                  fontWeight: FontWeight.w400,
+                                  color: Colors.orangeAccent,
+                                  letterSpacing: 0.8,
+                                ),
+                              ),
+                              SizedBox(height: 5),
+                              // 📅 Days
 
-                                Text(
-                                  _getAvailableDays(special.days ?? {}),
-                                  style: const TextStyle(
-                                    fontSize: 13,
-                                    color: Colors.white,
-                                    fontStyle: FontStyle.italic,
-                                  ),
+                              // 📝 Short Description
+                              Text(
+                                special.specialFor ??
+                                    "Delicious and fresh for today!",
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
                                 ),
-                                const SizedBox(height: 10),
-                                Text(
-                                  special.specialFor ?? '',
-                                  style: const TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.white,
-                                  ),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
                         ),
                       );
@@ -295,6 +449,36 @@ class HomeScreen extends ConsumerWidget {
       return nowMinutes >= startMinutes || nowMinutes <= endMinutes;
     }
   }
+}
+
+String _formatTimeOfDay(TimeOfDay time) {
+  final hour = time.hourOfPeriod == 0 ? 12 : time.hourOfPeriod; // 0 → 12
+  final minute = time.minute.toString().padLeft(2, '0');
+  final period = time.period == DayPeriod.am ? "AM" : "PM";
+  return "$hour:$minute $period";
+}
+
+Map<String, dynamic> isTimeInRangeWithLabel(
+  TimeOfDay now,
+  TimeOfDay start,
+  TimeOfDay end,
+) {
+  final nowMinutes = now.hour * 60 + now.minute;
+  final startMinutes = start.hour * 60 + start.minute;
+  final endMinutes = end.hour * 60 + end.minute;
+
+  bool inRange;
+  if (startMinutes <= endMinutes) {
+    inRange = nowMinutes >= startMinutes && nowMinutes <= endMinutes;
+  } else {
+    // Time range spans midnight
+    inRange = nowMinutes >= startMinutes || nowMinutes <= endMinutes;
+  }
+
+  return {
+    "inRange": inRange,
+    "rangeLabel": "${_formatTimeOfDay(start)} - ${_formatTimeOfDay(end)}",
+  };
 }
 
 // ✅ Helper for days formatting

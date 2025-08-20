@@ -15,9 +15,16 @@ class ProductsController extends ChangeNotifier {
   List<SpecialModel> specialsModel = [];
   List<Map<String, dynamic>> categoryModel = [];
   String selectedCategory = 'All';
+  int selectedCategoryId = 0;
+
+  setSelectedCategoryId(int id) {
+    selectedCategoryId = id;
+    notifyListeners();
+  }
 
   void setSelectedCategory(String category) {
     selectedCategory = category;
+
     notifyListeners();
   }
 
@@ -125,10 +132,17 @@ class ProductsController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final response = await superbaseService.getAll('specials');
+      final response = await SupabaseService.client
+          .from('specials')
+          .select(
+            'id, title, starttime, endtime, days, specialfor, '
+            'products(id, name, desc, price, status, image, subcategory, isSpecial, special_id, category, clicks_no, short_desc)',
+          );
+
       log(response.toString());
-      // Assuming you have a SpecialsModel
-      specialsModel = response.map((e) => SpecialModel.fromJson(e)).toList();
+
+      specialsModel =
+          (response as List).map((e) => SpecialModel.fromJson(e)).toList();
       notifyListeners();
     } catch (e) {
       log(e.toString());

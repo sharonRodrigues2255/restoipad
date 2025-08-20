@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:ipadresto/shared/network/urls.dart';
 import 'package:ipadresto/view/splash_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -19,14 +20,18 @@ class MyApp extends ConsumerWidget {
       debugShowCheckedModeBanner: false,
       title: 'Indian Curry',
       theme: ThemeData(
-        primaryColor: const Color(0xC09A5D),
-        scaffoldBackgroundColor: Colors.white,
-        textTheme: const TextTheme(
-          bodyLarge: TextStyle(color: Color(0x9C7147)),
-          bodyMedium: TextStyle(color: Color(0x9C7147)),
-        ),
-        colorScheme: ColorScheme.fromSwatch().copyWith(
-          secondary: const Color(0xC09A5D),
+        textTheme: TextTheme(
+          headlineLarge: GoogleFonts.anton(
+            fontSize: 60,
+            color: Colors.red,
+            letterSpacing: 2,
+          ),
+          titleMedium: GoogleFonts.montserrat(
+            fontSize: 22,
+            fontWeight: FontWeight.w600,
+            color: const Color(0xFFC5A25D),
+            letterSpacing: 2,
+          ),
         ),
       ),
       home: const SplashScreen(),

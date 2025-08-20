@@ -54,7 +54,12 @@ class FetchControllerController extends ChangeNotifier {
       final categoriesResp = await SupabaseService.client
           .from('categories')
           .select('id, title,hassub, subcategories(id, title)');
-      final specialsResp = await superbaseService.getAll('specials');
+      final specialsResp = await SupabaseService.client
+          .from('specials')
+          .select(
+            'id, title, starttime, endtime, days, specialfor, '
+            'products(id, name, desc, price, status, image, subcategory, isSpecial, special_id, category, clicks_no, short_desc)',
+          );
       log(
         'Fetch and store complete $productsResp special $specialsResp categories $categoriesResp',
       );
