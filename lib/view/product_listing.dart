@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:ipadresto/controller/providers/shared_preference_fetch.dart';
 import 'package:ipadresto/model/models/product_model.dart';
 import 'package:ipadresto/view/product_details.dart';
 
@@ -35,55 +34,121 @@ class ProductListing extends ConsumerWidget {
       length: hasSub ? category['subcategories'].length : 1,
       child: Scaffold(
         appBar: AppBar(
-          title: Text(
-            category['title'] ?? "Our Menu",
-            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+          title: Container(
+            height: 70,
+            width: 130,
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/images/splash.png'),
+                fit: BoxFit.cover,
+              ),
+            ),
           ),
           centerTitle: true,
-          backgroundColor: Colors.deepOrange,
-          bottom:
-              hasSub
-                  ? TabBar(
-                    isScrollable: true,
-                    labelColor: Colors.white,
-                    unselectedLabelColor: Colors.white70,
-                    indicatorColor: Colors.white,
-                    tabs: List.generate(
-                      category['subcategories'].length,
-                      (i) => Tab(text: category['subcategories'][i]['title']),
-                    ),
-                  )
-                  : null,
+          backgroundColor: Colors.white,
         ),
-        body: Builder(
-          builder: (_) {
-            // Case 1: Specials (no subcategories)
-            if (isSpecial) {
-              return _buildProductList(context, products, ref);
-            }
-
-            // Case 2: Normal category with subcategories
-            if (hasSub) {
-              return TabBarView(
-                children: List.generate(category['subcategories'].length, (i) {
-                  final sub = category['subcategories'][i]['title'];
-                  final filteredProducts =
-                      products
-                          .where((p) => (p.subcategory ?? '') == sub)
-                          .toList();
-                  return _buildProductList(context, filteredProducts, ref);
-                }),
-              );
-            }
-
-            // Case 3: Normal category without subcategories
-            return _buildProductList(context, products, ref);
-          },
+        body: Column(
+          children: [
+            SizedBox(height: 10),
+            Container(
+              height: hasSub ? 200 : 120,
+              width: double.infinity,
+              padding: const EdgeInsets.only(
+                top: 20,
+                left: 22,
+                right: 16,
+                bottom: 8,
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    category['title'].toString().toUpperCase(),
+                    style: const TextStyle(
+                      fontSize: 40,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFFCE2227),
+                    ),
+                  ),
+                  if (hasSub) ...[
+                    const SizedBox(height: 12),
+                    Container(
+                      height: 70,
+                      margin: const EdgeInsets.symmetric(vertical: 12),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: TabBar(
+                        isScrollable: false,
+                        labelColor: Colors.black87,
+                        unselectedLabelColor: Colors.black54,
+                        labelStyle: const TextStyle(
+                          fontSize: 24, // larger text
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1.2, // airy feel
+                        ),
+                        indicator: BoxDecoration(
+                          color: Colors.black.withOpacity(
+                            0.05,
+                          ), // elegant opacity indicator
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        indicatorSize: TabBarIndicatorSize.tab,
+                        tabs: List.generate(
+                          category['subcategories'].length,
+                          (i) => Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 8,
+                            ),
+                            child: Tab(
+                              child: Text(
+                                category['subcategories'][i]['title']
+                                    .toString()
+                                    .toUpperCase(),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            Expanded(
+              child:
+                  isSpecial
+                      ? _buildProductList(context, products, ref)
+                      : hasSub
+                      ? TabBarView(
+                        children: List.generate(
+                          category['subcategories'].length,
+                          (i) {
+                            final sub = category['subcategories'][i]['title'];
+                            final filteredProducts =
+                                products
+                                    .where((p) => (p.subcategory ?? '') == sub)
+                                    .toList();
+                            return _buildProductList(
+                              context,
+                              filteredProducts,
+                              ref,
+                            );
+                          },
+                        ),
+                      )
+                      : _buildProductList(context, products, ref),
+            ),
+          ],
         ),
       ),
     );
   }
 
+  /// Build list of products with empty state handling
   Widget _buildProductList(
     BuildContext context,
     List<ProductModel> list,
@@ -91,20 +156,17 @@ class ProductListing extends ConsumerWidget {
   ) {
     if (list.isEmpty) return _buildEmptyScreen(context);
 
-    return SingleChildScrollView(
+    return ListView.builder(
       padding: const EdgeInsets.all(16),
-      child: ListView.builder(
-        itemCount: list.length,
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        itemBuilder: (context, index) {
-          final product = list[index];
-          return _productTile(context, list, product, index, ref);
-        },
-      ),
+      itemCount: list.length,
+      itemBuilder: (context, index) {
+        final product = list[index];
+        return _productTile(context, list, product, index, ref);
+      },
     );
   }
 
+  /// Empty state widget
   Widget _buildEmptyScreen(BuildContext context) {
     return Center(
       child: Padding(
@@ -130,6 +192,7 @@ class ProductListing extends ConsumerWidget {
     );
   }
 
+  /// Single product tile
   Widget _productTile(
     BuildContext context,
     List<ProductModel> currentList,
@@ -176,7 +239,6 @@ class ProductListing extends ConsumerWidget {
                 child: _productImage(product.image),
               ),
             ),
-
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(25, 12, 12, 12),
@@ -185,9 +247,10 @@ class ProductListing extends ConsumerWidget {
                   children: [
                     // Name
                     Text(
-                      product.name ?? "Unnamed Product",
+                      product.name.toString().toUpperCase() ??
+                          "Unnamed Product",
                       style: const TextStyle(
-                        color: Colors.black,
+                        color: Color(0xFFCE2227),
                         fontWeight: FontWeight.bold,
                         fontSize: 18,
                         height: 1.2,
@@ -196,7 +259,6 @@ class ProductListing extends ConsumerWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 6),
-
                     // Short desc
                     Text(
                       product.shortDesc ?? "Delicious and freshly made",
@@ -289,6 +351,7 @@ class ProductListing extends ConsumerWidget {
     );
   }
 
+  /// Product image with fallback
   Widget _productImage(String? url) {
     if (url == null || url.isEmpty) {
       return Image.asset("assets/images/backupImage.png", fit: BoxFit.cover);

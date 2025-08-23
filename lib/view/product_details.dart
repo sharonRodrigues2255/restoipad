@@ -33,12 +33,18 @@ class _ProductDetailsState extends State<ProductDetails> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          products[_currentIndex].name ?? "Product",
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+        title: Container(
+          height: 70,
+          width: 130,
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage('assets/images/splash.png'),
+              fit: BoxFit.cover,
+            ),
+          ),
         ),
         centerTitle: true,
-        backgroundColor: Colors.deepOrange,
+        backgroundColor: Colors.white,
       ),
       body: PageView.builder(
         controller: _pageController,
@@ -60,7 +66,9 @@ class _ProductDetailsState extends State<ProductDetails> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
+          SizedBox(height: 25),
+          Container(
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
             height: 300,
             width: double.infinity,
             child:
@@ -87,10 +95,22 @@ class _ProductDetailsState extends State<ProductDetails> {
                       fit: BoxFit.cover,
                     ),
           ),
+          SizedBox(height: 8),
+          Padding(
+            padding: const EdgeInsets.only(left: 20, top: 10, bottom: 0),
+            child: Text(
+              product.name.toString().toUpperCase() ?? "Product",
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 35,
+                color: Color(0xFFCE2227),
+              ),
+            ),
+          ),
 
           /// Details Section
           Padding(
-            padding: const EdgeInsets.all(20.0),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -111,7 +131,7 @@ class _ProductDetailsState extends State<ProductDetails> {
                 Text(
                   product.shortDesc ?? "Delicious and freshly prepared!",
                   style: const TextStyle(
-                    fontSize: 16,
+                    fontSize: 18,
                     color: Colors.black87,
                     height: 1.4,
                   ),
@@ -123,7 +143,7 @@ class _ProductDetailsState extends State<ProductDetails> {
                   product.desc ??
                       "This dish is made with the finest ingredients to give you the perfect dining experience. Enjoy the rich taste and aroma!",
                   style: TextStyle(
-                    fontSize: 15,
+                    fontSize: 17,
                     color: Colors.grey.shade700,
                     height: 1.5,
                   ),

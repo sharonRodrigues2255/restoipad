@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ipadresto/controller/providers/shared_preference_fetch.dart';
 import 'package:ipadresto/view/product_listing.dart';
 
-// Color & Font constants
 const Color kButtonColor = Color(0xFFC09A5D);
 const Color kTextColor = Color(0xFF9C7147);
 const Color kRedColor = Colors.red;
@@ -23,10 +22,10 @@ class HomeScreen extends ConsumerWidget {
     final categories = fetchController.categoryModel;
 
     return Scaffold(
-      backgroundColor: Colors.grey[900],
+      backgroundColor: Colors.white,
       drawer: Drawer(
         child: Container(
-          color: Colors.grey[850],
+          color: Colors.white,
           child: ListView(
             padding: EdgeInsets.zero,
             children: [
@@ -42,10 +41,10 @@ class HomeScreen extends ConsumerWidget {
                 ),
               ),
               ListTile(
-                leading: const Icon(Icons.sync, color: Colors.white),
+                leading: const Icon(Icons.sync, color: Colors.black),
                 title: const Text(
                   'Sync Data',
-                  style: TextStyle(color: Colors.white),
+                  style: TextStyle(color: Colors.black),
                 ),
                 onTap: () {
                   fetchController.syncData(context);
@@ -56,186 +55,201 @@ class HomeScreen extends ConsumerWidget {
           ),
         ),
       ),
-      appBar: AppBar(
-        backgroundColor: Colors.grey[850],
-        title: Container(
-          height: 50,
-          width: 90,
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage('assets/images/splash.png'),
-              fit: BoxFit.cover,
+      body: Stack(
+        children: [
+          Align(
+            alignment: Alignment.bottomLeft,
+            child: Container(
+              width: double.infinity,
+              height: MediaQuery.of(context).size.height,
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage("assets/images/localfood.png"),
+                  alignment: Alignment.bottomLeft, // bottom-left position
+                  fit: BoxFit.contain, // keep aspect ratio
+                ),
+              ),
             ),
           ),
-        ),
-        iconTheme: const IconThemeData(color: kTextColor),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(kPadding),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 70),
-              categories.isEmpty
-              ? Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(32.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.category_outlined,
-                        size: 100,
-                        color: Colors.grey.shade400,
-                      ),
-                      const SizedBox(height: 20),
-                      const Text(
-                        "No Categories Found",
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        "Start by adding categories to organize your menu items.",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.grey.shade600,
-                        ),
-                      ),
-                      const SizedBox(height: 30),
-                      ElevatedButton.icon(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.deepOrange,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 24,
-                            vertical: 12,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        icon: const Icon(Icons.add, color: Colors.white),
-                        label: const Text(
-                          "Add Category",
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
-                          ),
-                        ),
-                        onPressed: () {
-                          Navigator.pushNamed(context, '/addcategory');
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-              ) : Center(
-                    child: ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: categories.length,
-                      itemBuilder: (context, index) {
-                        final category = categories[index];
-
-                        // ✅ get first product image safely
-                        String bgImage = 'assets/images/backupImage.png';
-                        if (category['products'] != null &&
-                            category['products'].isNotEmpty &&
-                            category['products'][0]['image'] != null &&
-                            category['products'][0]['image']
-                                .toString()
-                                .isNotEmpty) {
-                          bgImage = category['products'][0]['image'];
-                        }
-
-                        return InkWell(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder:
-                                    (context) => ProductListing(
-                                      isSpecial: false,
-                                      products:
-                                          ref
-                                              .watch(fetchProvider)
-                                              .productModel
-                                              .where(
-                                                (product) =>
-                                                    product.category ==
-                                                    category['title'],
-                                              )
-                                              .toList(),
-                                      index: index,
-                                      categories:
-                                          ref
-                                              .watch(fetchProvider)
-                                              .categoryModel,
-                                    ),
+          Padding(
+            padding: const EdgeInsets.all(kPadding),
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 70),
+                  categories.isEmpty
+                      ? Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(32.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.category_outlined,
+                                size: 100,
+                                color: Colors.grey.shade400,
                               ),
-                            );
-                          },
-                          child: Container(
-                            margin: const EdgeInsets.symmetric(
-                              vertical: 8,
-                              horizontal: 7,
-                            ),
-                            height: 100, // good height for cover effect
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(20),
-                              image: DecorationImage(
-                                image:
-                                    bgImage.startsWith('http')
-                                        ? NetworkImage(bgImage)
-                                        : AssetImage(bgImage) as ImageProvider,
-                                fit: BoxFit.cover, // cover effect
-                                colorFilter: ColorFilter.mode(
-                                  Colors.black.withOpacity(
-                                    0.4,
-                                  ), // dark overlay for readability
-                                  BlendMode.darken,
-                                ),
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black26,
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 5),
-                                ),
-                              ],
-                            ),
-                            child: Center(
-                              child: Text(
-                                category['title'] ?? 'Category',
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 22,
+                              const SizedBox(height: 20),
+                              const Text(
+                                "No Categories Found",
+                                style: TextStyle(
+                                  fontSize: 20,
                                   fontWeight: FontWeight.bold,
-                                  shadows: [
-                                    Shadow(
-                                      color: Colors.black54,
-                                      blurRadius: 6,
-                                      offset: Offset(2, 2),
-                                    ),
-                                  ],
+                                  color: Colors.black87,
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              Text(
+                                "Start by adding categories to organize your menu items.",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.grey.shade600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                      : Center(
+                        child: Column(
+                          children: [
+                            Container(
+                              height: 120,
+                              width: 250,
+                              decoration: BoxDecoration(
+                                image: DecorationImage(
+                                  image: AssetImage('assets/images/splash.png'),
+                                  fit: BoxFit.cover,
                                 ),
                               ),
                             ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-            ],
+                            Container(
+                              // decoration: BoxDecoration(
+                              //   image: DecorationImage(
+                              //     image: AssetImage('assets/images/menu_image.png'),
+                              //     fit: BoxFit.cover,
+                              //   ),
+                              // ),
+                              padding: EdgeInsets.only(
+                                top: 100,
+                                right: 170,
+                                left: 170,
+                                bottom: 100,
+                              ),
+                              child: ListView.builder(
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                itemCount: categories.length,
+                                itemBuilder: (context, index) {
+                                  final category = categories[index];
+
+                                  // ✅ get first product image safely
+                                  String bgImage =
+                                      'assets/images/backupImage.png';
+                                  if (category['products'] != null &&
+                                      category['products'].isNotEmpty &&
+                                      category['products'][0]['image'] !=
+                                          null &&
+                                      category['products'][0]['image']
+                                          .toString()
+                                          .isNotEmpty) {
+                                    bgImage = category['products'][0]['image'];
+                                  }
+
+                                  return InkWell(
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder:
+                                              (context) => ProductListing(
+                                                isSpecial: false,
+                                                products:
+                                                    ref
+                                                        .watch(fetchProvider)
+                                                        .productModel
+                                                        .where(
+                                                          (product) =>
+                                                              product
+                                                                  .category ==
+                                                              category['title'],
+                                                        )
+                                                        .toList(),
+                                                index: index,
+                                                categories:
+                                                    ref
+                                                        .watch(fetchProvider)
+                                                        .categoryModel,
+                                              ),
+                                        ),
+                                      );
+                                    },
+                                    child: Container(
+                                      margin: const EdgeInsets.symmetric(
+                                        vertical: 8,
+                                        horizontal: 7,
+                                      ),
+                                      height: 70,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(20),
+                                        image: DecorationImage(
+                                          image:
+                                              bgImage.startsWith('http')
+                                                  ? NetworkImage(bgImage)
+                                                  : AssetImage(bgImage)
+                                                      as ImageProvider,
+                                          fit: BoxFit.cover, // cover effect
+                                          colorFilter: ColorFilter.mode(
+                                            Colors.black.withOpacity(
+                                              0.4,
+                                            ), // dark overlay for readability
+                                            BlendMode.darken,
+                                          ),
+                                        ),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black26,
+                                            blurRadius: 10,
+                                            offset: const Offset(0, 5),
+                                          ),
+                                        ],
+                                      ),
+                                      child: Center(
+                                        child: Text(
+                                          category['title']
+                                                  .toString()
+                                                  .toUpperCase() ??
+                                              'Category',
+                                          textAlign: TextAlign.center,
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 22,
+                                            fontWeight: FontWeight.bold,
+                                            shadows: [
+                                              Shadow(
+                                                color: Colors.black54,
+                                                blurRadius: 6,
+                                                offset: Offset(2, 2),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                ],
+              ),
+            ),
           ),
-        ),
+        ],
       ),
       floatingActionButton: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -264,7 +278,6 @@ class HomeScreen extends ConsumerWidget {
                       final now = TimeOfDay.now();
                       bool isAvailable = true;
 
-                      // ✅ Time range check
                       try {
                         final startParts =
                             special.startTime
@@ -292,144 +305,146 @@ class HomeScreen extends ConsumerWidget {
                       } catch (e) {
                         debugPrint("Error parsing time: $e");
                       }
-
-                      return InkWell(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder:
-                                  (context) => ProductListing(
-                                    categories: [],
-                                    index: 0,
-                                    isSpecial: true,
-                                    special: {"title": special.title},
-                                    products: special.products ?? [],
-                                  ),
-                            ),
-                          );
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 15),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              // 🏷 Fancy Gradient Title
-                              // Days text
-                              const SizedBox(height: 10),
-
-                              // Time Row (Fancy style)
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(6),
-                                    decoration: BoxDecoration(
-                                      color: Colors.orangeAccent.withOpacity(
-                                        0.15,
-                                      ),
-                                      borderRadius: BorderRadius.circular(30),
+                      if (isSpecialActive(special.toJson())) {
+                        return InkWell(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder:
+                                    (context) => ProductListing(
+                                      categories: [],
+                                      index: 0,
+                                      isSpecial: true,
+                                      special: {"title": special.title},
+                                      products: special.products ?? [],
                                     ),
-                                    child: const Icon(
-                                      Icons.access_time,
-                                      size: 20,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    "${special.startTime} - ${special.endTime}",
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                      letterSpacing: 0.5,
-                                    ),
-                                  ),
-                                ],
                               ),
-                              SizedBox(height: 6),
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(18),
-                                child: CachedNetworkImage(
-                                  imageUrl: special.products?.first.image ?? '',
-                                  height: 100,
-                                  width: 120,
-                                  fit: BoxFit.cover,
-                                  placeholder:
-                                      (context, url) => Container(
-                                        height: 100,
-                                        width: 120,
-                                        color: Colors.grey[200],
-                                        child: const Center(
-                                          child: CircularProgressIndicator(),
+                            );
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 15),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                // 🏷 Fancy Gradient Title
+                                // Days text
+                                const SizedBox(height: 10),
+
+                                // Time Row (Fancy style)
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(6),
+                                      decoration: BoxDecoration(
+                                        color: Colors.orangeAccent.withOpacity(
+                                          0.15,
                                         ),
+                                        borderRadius: BorderRadius.circular(30),
                                       ),
-                                  errorWidget:
-                                      (context, url, error) => Image.asset(
-                                        "assets/images/specials.png",
-                                        height: 100,
-                                        width: 120,
-                                        fit: BoxFit.cover,
+                                      child: const Icon(
+                                        Icons.access_time,
+                                        size: 20,
+                                        color: Colors.grey,
                                       ),
-                                ),
-                              ),
-                              const SizedBox(height: 12),
-                              Text(
-                                special.title ?? "Special Dish",
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 40,
-                                  fontWeight: FontWeight.bold,
-                                  foreground:
-                                      Paint()
-                                        ..shader = LinearGradient(
-                                          colors: [
-                                            Colors.deepOrange,
-                                            Colors.orangeAccent,
-                                          ],
-                                        ).createShader(
-                                          const Rect.fromLTWH(0, 0, 200, 70),
-                                        ),
-                                  shadows: [
-                                    Shadow(
-                                      blurRadius: 6,
-                                      color: Colors.black.withOpacity(0.3),
-                                      offset: const Offset(2, 2),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      "${special.startTime} - ${special.endTime}",
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black,
+                                        letterSpacing: 0.5,
+                                      ),
                                     ),
                                   ],
                                 ),
-                              ),
-                              SizedBox(height: 8),
-                              Text(
-                                _getAvailableDays(special.days ?? {}),
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  fontStyle: FontStyle.italic,
-                                  fontWeight: FontWeight.w400,
-                                  color: Colors.orangeAccent,
-                                  letterSpacing: 0.8,
+                                SizedBox(height: 6),
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(18),
+                                  child: CachedNetworkImage(
+                                    imageUrl:
+                                        special.products?.first.image ?? '',
+                                    height: 100,
+                                    width: 120,
+                                    fit: BoxFit.cover,
+                                    placeholder:
+                                        (context, url) => Container(
+                                          height: 100,
+                                          width: 120,
+                                          color: Colors.grey[200],
+                                          child: const Center(
+                                            child: CircularProgressIndicator(),
+                                          ),
+                                        ),
+                                    errorWidget:
+                                        (context, url, error) => Image.asset(
+                                          "assets/images/specials.png",
+                                          height: 100,
+                                          width: 120,
+                                          fit: BoxFit.cover,
+                                        ),
+                                  ),
                                 ),
-                              ),
-                              SizedBox(height: 5),
-                              // 📅 Days
+                                const SizedBox(height: 12),
+                                Text(
+                                  special.title ?? "Special Dish",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 40,
+                                    fontWeight: FontWeight.bold,
+                                    foreground:
+                                        Paint()
+                                          ..shader = LinearGradient(
+                                            colors: [
+                                              Colors.deepOrange,
+                                              Colors.orangeAccent,
+                                            ],
+                                          ).createShader(
+                                            const Rect.fromLTWH(0, 0, 200, 70),
+                                          ),
+                                    shadows: [
+                                      Shadow(
+                                        blurRadius: 6,
+                                        color: Colors.black.withOpacity(0.3),
+                                        offset: const Offset(2, 2),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                SizedBox(height: 8),
+                                Text(
+                                  _getAvailableDays(special.days ?? {}),
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontStyle: FontStyle.italic,
+                                    fontWeight: FontWeight.w400,
+                                    color: Colors.black,
+                                    letterSpacing: 0.8,
+                                  ),
+                                ),
+                                SizedBox(height: 5),
+                                // 📅 Days
 
-                              // 📝 Short Description
-                              Text(
-                                special.specialFor ??
-                                    "Delicious and fresh for today!",
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white,
+                                // 📝 Short Description
+                                Text(
+                                  special.specialFor ??
+                                      "Delicious and fresh for today!",
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.black,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                      );
+                        );
+                      }
                     },
                   ),
         ),
@@ -489,4 +504,49 @@ String _getAvailableDays(Map days) {
           .map((e) => e.key.substring(0, 3))
           .toList();
   return available.isEmpty ? 'No days available' : available.join(', ');
+}
+
+bool isSpecialActive(Map<String, dynamic> special) {
+  final now = DateTime.now();
+
+  // 1. Get today's weekday string (Monday, Tuesday…)
+  final weekday =
+      [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+        "Sunday",
+      ][now.weekday - 1];
+
+  // 2. Check if today is active
+  final isTodayActive = special["days"][weekday] ?? false;
+  if (!isTodayActive) return false;
+
+  // 3. Parse start and end times into DateTime (for today)
+  final startParts = (special["starttime"] as String).split(":");
+  final endParts = (special["endtime"] as String).split(":");
+
+  final startTime = DateTime(
+    now.year,
+    now.month,
+    now.day,
+    int.parse(startParts[0]),
+    int.parse(startParts[1]),
+    int.parse(startParts[2]),
+  );
+
+  final endTime = DateTime(
+    now.year,
+    now.month,
+    now.day,
+    int.parse(endParts[0]),
+    int.parse(endParts[1]),
+    int.parse(endParts[2]),
+  );
+
+  // 4. Check if now is within the range
+  return now.isAfter(startTime) && now.isBefore(endTime);
 }
