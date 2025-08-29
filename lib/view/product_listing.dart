@@ -63,7 +63,7 @@ class ProductListing extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    category['title'].toString().toUpperCase(),
+                    category['title']?.toString().toUpperCase() ?? '',
                     style: const TextStyle(
                       fontSize: 40,
                       fontWeight: FontWeight.w700,

@@ -56,7 +56,7 @@ class HomeScreen extends ConsumerWidget {
       body: Stack(
         children: [
           Align(
-            alignment: Alignment.bottomLeft,
+            alignment: Alignment.bottomRight,
             child: Container(
               width: double.infinity,
               height: MediaQuery.of(context).size.height,
@@ -191,21 +191,9 @@ class HomeScreen extends ConsumerWidget {
                                       ),
                                       height: 70,
                                       decoration: BoxDecoration(
+                                        color: Colors.grey.shade900,
                                         borderRadius: BorderRadius.circular(20),
-                                        image: DecorationImage(
-                                          image:
-                                              bgImage.startsWith('http')
-                                                  ? NetworkImage(bgImage)
-                                                  : AssetImage(bgImage)
-                                                      as ImageProvider,
-                                          fit: BoxFit.cover, // cover effect
-                                          colorFilter: ColorFilter.mode(
-                                            Colors.black.withOpacity(
-                                              0.4,
-                                            ), // dark overlay for readability
-                                            BlendMode.darken,
-                                          ),
-                                        ),
+
                                         boxShadow: [
                                           BoxShadow(
                                             color: Colors.black26,
@@ -246,62 +234,118 @@ class HomeScreen extends ConsumerWidget {
               ),
             ),
           ),
+
+          Positioned(
+            right: 20,
+            bottom: 40,
+            child:
+                specials.isEmpty
+                    ? const SizedBox()
+                    : Column(
+                      children:
+                          specials.map((special) {
+                            if (isSpecialActive(special.toJson())) {
+                              return InkWell(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder:
+                                          (context) => ProductListing(
+                                            categories: [],
+                                            index: 0,
+                                            isSpecial: true,
+                                            special: {"title": special.title},
+                                            products: special.products ?? [],
+                                          ),
+                                    ),
+                                  );
+                                },
+                                child: Container(
+                                  margin: const EdgeInsets.only(bottom: 20),
+                                  width: 160,
+                                  height: 160,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    gradient: const LinearGradient(
+                                      colors: [
+                                        Color(0xFF1C1C1C),
+                                        Color(0xFF0A0A0A),
+                                      ],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                    ),
+                                    border: Border.all(
+                                      width: 4,
+                                      color: Colors.orangeAccent,
+                                    ),
+                                  ),
+                                  child: Center(
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          special.title ?? "Special",
+                                          textAlign: TextAlign.center,
+                                          style: const TextStyle(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.orangeAccent,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 6),
+                                        Text(
+                                          "${special.startTime} - ${special.endTime}",
+                                          style: const TextStyle(
+                                            fontSize: 14,
+                                            color: Colors.white70,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          _getAvailableDays(special.days ?? {}),
+                                          textAlign: TextAlign.center,
+                                          style: const TextStyle(
+                                            fontSize: 12,
+                                            fontStyle: FontStyle.italic,
+                                            color: Colors.white54,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }
+                            return const SizedBox();
+                          }).toList(),
+                    ),
+          ),
         ],
       ),
       floatingActionButton: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(borderRadius: BorderRadius.circular(100)),
-          height: 320,
-          width: 320,
-          child:
-              specials.isEmpty
-                  ? const Center(
-                    child: Text(
-                      'No Specials Available',
-                      style: TextStyle(
-                        color: Colors.black54,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                      ),
+        child:
+            specials.isEmpty
+                ? const Center(
+                  child: Text(
+                    'No Specials Available',
+                    style: TextStyle(
+                      color: Colors.black54,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
                     ),
-                  )
-                  : ListView.builder(
+                  ),
+                )
+                : SizedBox(
+                  height: 320,
+                  child: ListView.builder(
                     scrollDirection: Axis.horizontal,
                     itemCount: specials.length,
                     itemBuilder: (context, index) {
                       final special = specials[index];
-                      final now = TimeOfDay.now();
-                      bool isAvailable = true;
 
-                      try {
-                        final startParts =
-                            special.startTime
-                                .toString()
-                                .split(':')
-                                .map(int.parse)
-                                .toList();
-                        final endParts =
-                            special.endTime
-                                .toString()
-                                .split(':')
-                                .map(int.parse)
-                                .toList();
-
-                        final start = TimeOfDay(
-                          hour: startParts[0],
-                          minute: startParts[1],
-                        );
-                        final end = TimeOfDay(
-                          hour: endParts[0],
-                          minute: endParts[1],
-                        );
-
-                        isAvailable = _isTimeInRange(now, start, end);
-                      } catch (e) {
-                        debugPrint("Error parsing time: $e");
-                      }
                       if (isSpecialActive(special.toJson())) {
                         return InkWell(
                           onTap: () {
@@ -321,100 +365,71 @@ class HomeScreen extends ConsumerWidget {
                           },
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 15),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                const SizedBox(height: 10),
-                                Row(
+                            child: Container(
+                              width: 220,
+                              height: 220,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                gradient: const LinearGradient(
+                                  colors: [
+                                    Color(0xFF1C1C1C),
+                                    Color(0xFF0A0A0A),
+                                  ],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                                border: Border.all(
+                                  width: 4,
+                                  color: Colors.orangeAccent,
+                                ),
+                              ),
+                              child: Center(
+                                child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Container(
-                                      padding: const EdgeInsets.all(6),
-                                      decoration: BoxDecoration(
-                                        color: Colors.orangeAccent.withOpacity(
-                                          0.15,
-                                        ),
-                                        borderRadius: BorderRadius.circular(30),
-                                      ),
-                                      child: const Icon(
-                                        Icons.access_time,
-                                        size: 20,
-                                        color: Colors.grey,
+                                    // Special Title
+                                    Text(
+                                      special.title ?? "Special Dish",
+                                      textAlign: TextAlign.center,
+                                      style: const TextStyle(
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.orangeAccent,
+                                        letterSpacing: 1.2,
                                       ),
                                     ),
-                                    const SizedBox(width: 8),
+                                    const SizedBox(height: 8),
+                                    // Special Time
                                     Text(
                                       "${special.startTime} - ${special.endTime}",
                                       style: const TextStyle(
                                         fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.black,
-                                        letterSpacing: 0.5,
+                                        color: Colors.white70,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 6),
+                                    // Special Days
+                                    Text(
+                                      _getAvailableDays(special.days ?? {}),
+                                      textAlign: TextAlign.center,
+                                      style: const TextStyle(
+                                        fontSize: 13,
+                                        fontStyle: FontStyle.italic,
+                                        color: Colors.white54,
                                       ),
                                     ),
                                   ],
                                 ),
-
-                                const SizedBox(height: 12),
-                                Text(
-                                  special.title ?? "Special Dish",
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontSize: 40,
-                                    fontWeight: FontWeight.bold,
-                                    foreground:
-                                        Paint()
-                                          ..shader = LinearGradient(
-                                            colors: [
-                                              Colors.deepOrange,
-                                              Colors.orangeAccent,
-                                            ],
-                                          ).createShader(
-                                            const Rect.fromLTWH(0, 0, 200, 70),
-                                          ),
-                                    shadows: [
-                                      Shadow(
-                                        blurRadius: 6,
-                                        color: Colors.black.withOpacity(0.3),
-                                        offset: const Offset(2, 2),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                SizedBox(height: 8),
-                                Text(
-                                  _getAvailableDays(special.days ?? {}),
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    fontStyle: FontStyle.italic,
-                                    fontWeight: FontWeight.w400,
-                                    color: Colors.black,
-                                    letterSpacing: 0.8,
-                                  ),
-                                ),
-                                SizedBox(height: 5),
-                                // 📅 Days
-
-                                // 📝 Short Description
-                                Text(
-                                  special.specialFor ??
-                                      "Delicious and fresh for today!",
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.black,
-                                  ),
-                                ),
-                              ],
+                              ),
                             ),
                           ),
                         );
                       }
+                      return const SizedBox();
                     },
                   ),
-        ),
+                ),
       ),
     );
   }
