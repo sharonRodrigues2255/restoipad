@@ -277,13 +277,9 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
-			inputPaths = (
-			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -481,7 +477,8 @@
 				DEVELOPMENT_TEAM = 7UL939L984;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = Runner/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Indian kichen";
+				INFOPLIST_KEY_CFBundleDisplayName = "Indian kitchen (Curry island)";
+				"INFOPLIST_KEY_CFBundleDisplayName[sdk=iphoneos*]" = "Indian kitchen (Curry island)";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.food-and-drink";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -692,7 +689,8 @@
 				DEVELOPMENT_TEAM = 7UL939L984;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = Runner/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Indian kichen";
+				INFOPLIST_KEY_CFBundleDisplayName = "Indian kitchen (Curry island)";
+				"INFOPLIST_KEY_CFBundleDisplayName[sdk=iphoneos*]" = "Indian kitchen (Curry island)";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.food-and-drink";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -728,7 +726,8 @@
 				DEVELOPMENT_TEAM = 7UL939L984;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = Runner/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Indian kichen";
+				INFOPLIST_KEY_CFBundleDisplayName = "Indian kitchen (Curry island)";
+				"INFOPLIST_KEY_CFBundleDisplayName[sdk=iphoneos*]" = "Indian kitchen (Curry island)";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.food-and-drink";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

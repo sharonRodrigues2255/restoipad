@@ -45,7 +45,6 @@ class ProductListing extends ConsumerWidget {
             ),
           ),
           centerTitle: true,
-          backgroundColor: Colors.white,
         ),
         body: Column(
           children: [
@@ -247,8 +246,7 @@ class ProductListing extends ConsumerWidget {
                   children: [
                     // Name
                     Text(
-                      product.name.toString().toUpperCase() ??
-                          "Unnamed Product",
+                      product.name.toString().toUpperCase(),
                       style: const TextStyle(
                         color: Color(0xFFCE2227),
                         fontWeight: FontWeight.bold,

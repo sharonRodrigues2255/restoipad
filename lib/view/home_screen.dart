@@ -1,7 +1,7 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ipadresto/controller/providers/shared_preference_fetch.dart';
+import 'package:ipadresto/shared/providers/theme_providers.dart';
 import 'package:ipadresto/view/product_listing.dart';
 
 const Color kButtonColor = Color(0xFFC09A5D);
@@ -20,40 +20,38 @@ class HomeScreen extends ConsumerWidget {
 
     final specials = fetchController.specialsModel;
     final categories = fetchController.categoryModel;
+    final themeMode = ref.watch(themeModeProvider);
+
+    // Check if dark mode is active
+    final isDark =
+        themeMode == ThemeMode.dark ||
+        (themeMode == ThemeMode.system &&
+            MediaQuery.of(context).platformBrightness == Brightness.dark);
+
+    final bgImage =
+        isDark ? "assets/images/dark_bg.png" : "assets/images/light_bg.png";
 
     return Scaffold(
-      backgroundColor: Colors.white,
-      drawer: Drawer(
-        child: Container(
-          color: Colors.white,
-          child: ListView(
-            padding: EdgeInsets.zero,
-            children: [
-              DrawerHeader(
-                decoration: BoxDecoration(color: kButtonColor),
-                child: Text(
-                  'Update New Data',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              ListTile(
-                leading: const Icon(Icons.sync, color: Colors.black),
-                title: const Text(
-                  'Sync Data',
-                  style: TextStyle(color: Colors.black),
-                ),
-                onTap: () {
-                  fetchController.syncData(context);
-                  Navigator.pop(context);
-                },
-              ),
-            ],
-          ),
+      appBar: AppBar(
+        leading: IconButton(
+          onPressed: () {
+            fetchController.fetchAndStoreAll(context: context);
+          },
+          icon: Icon(Icons.sync),
         ),
+        actions: [
+          IconButton(
+            icon: Icon(
+              isDark ? Icons.wb_sunny_outlined : Icons.dark_mode_outlined,
+              size: 32,
+              color: isDark ? Colors.yellow : Colors.black,
+            ),
+            onPressed: () {
+              ref.read(themeModeProvider.notifier).state =
+                  isDark ? ThemeMode.light : ThemeMode.dark;
+            },
+          ),
+        ],
       ),
       body: Stack(
         children: [
@@ -219,9 +217,8 @@ class HomeScreen extends ConsumerWidget {
                                       child: Center(
                                         child: Text(
                                           category['title']
-                                                  .toString()
-                                                  .toUpperCase() ??
-                                              'Category',
+                                              .toString()
+                                              .toUpperCase(),
                                           textAlign: TextAlign.center,
                                           style: const TextStyle(
                                             color: Colors.white,
@@ -327,11 +324,7 @@ class HomeScreen extends ConsumerWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                // 🏷 Fancy Gradient Title
-                                // Days text
                                 const SizedBox(height: 10),
-
-                                // Time Row (Fancy style)
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
@@ -361,33 +354,7 @@ class HomeScreen extends ConsumerWidget {
                                     ),
                                   ],
                                 ),
-                                SizedBox(height: 6),
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(18),
-                                  child: CachedNetworkImage(
-                                    imageUrl:
-                                        special.products?.first.image ?? '',
-                                    height: 100,
-                                    width: 120,
-                                    fit: BoxFit.cover,
-                                    placeholder:
-                                        (context, url) => Container(
-                                          height: 100,
-                                          width: 120,
-                                          color: Colors.grey[200],
-                                          child: const Center(
-                                            child: CircularProgressIndicator(),
-                                          ),
-                                        ),
-                                    errorWidget:
-                                        (context, url, error) => Image.asset(
-                                          "assets/images/specials.png",
-                                          height: 100,
-                                          width: 120,
-                                          fit: BoxFit.cover,
-                                        ),
-                                  ),
-                                ),
+
                                 const SizedBox(height: 12),
                                 Text(
                                   special.title ?? "Special Dish",

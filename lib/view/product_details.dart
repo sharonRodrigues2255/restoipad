@@ -44,7 +44,6 @@ class _ProductDetailsState extends State<ProductDetails> {
           ),
         ),
         centerTitle: true,
-        backgroundColor: Colors.white,
       ),
       body: PageView.builder(
         controller: _pageController,
@@ -99,7 +98,7 @@ class _ProductDetailsState extends State<ProductDetails> {
           Padding(
             padding: const EdgeInsets.only(left: 20, top: 10, bottom: 0),
             child: Text(
-              product.name.toString().toUpperCase() ?? "Product",
+              product.name.toString().toUpperCase(),
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 35,
