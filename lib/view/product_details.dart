@@ -33,15 +33,11 @@ class _ProductDetailsState extends State<ProductDetails> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Container(
-          height: 70,
-          width: 130,
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage('assets/images/splash.png'),
-              fit: BoxFit.cover,
-            ),
-          ),
+        backgroundColor: Colors.black,
+        elevation: 0,
+        title: SizedBox(
+          height: 60,
+          child: Image.asset("assets/images/logogreydark.png"),
         ),
         centerTitle: true,
       ),

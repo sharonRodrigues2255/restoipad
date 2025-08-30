@@ -55,6 +55,16 @@ class HomeScreen extends ConsumerWidget {
       ),
       body: Stack(
         children: [
+          // Container(
+          //   width: double.infinity,
+          //   height: double.infinity,
+          //   decoration: BoxDecoration(
+          //     image: DecorationImage(
+          //       fit: BoxFit.cover,
+          //       image: AssetImage("assets/images/BACKGROUD.png"),
+          //     ),
+          //   ),
+          // ),
           Align(
             alignment: Alignment.bottomRight,
             child: Container(
@@ -114,22 +124,22 @@ class HomeScreen extends ConsumerWidget {
                         child: Column(
                           children: [
                             Container(
+                              constraints: BoxConstraints(
+                                maxWidth: 500,
+                                maxHeight: 120,
+                              ),
                               height: 120,
-                              width: 250,
+                              width: 500,
                               decoration: BoxDecoration(
                                 image: DecorationImage(
-                                  image: AssetImage('assets/images/splash.png'),
-                                  fit: BoxFit.cover,
+                                  image: AssetImage(
+                                    'assets/images/logogreydark.png',
+                                  ),
+                                  fit: BoxFit.fitWidth,
                                 ),
                               ),
                             ),
                             Container(
-                              // decoration: BoxDecoration(
-                              //   image: DecorationImage(
-                              //     image: AssetImage('assets/images/menu_image.png'),
-                              //     fit: BoxFit.cover,
-                              //   ),
-                              // ),
                               padding: EdgeInsets.only(
                                 top: 100,
                                 right: 170,
@@ -189,36 +199,48 @@ class HomeScreen extends ConsumerWidget {
                                         vertical: 8,
                                         horizontal: 7,
                                       ),
-                                      height: 70,
+                                      height: 80,
                                       decoration: BoxDecoration(
-                                        color: Colors.grey.shade900,
+                                        color: Colors.grey.withOpacity(.1),
                                         borderRadius: BorderRadius.circular(20),
-
+                                        border: const Border(
+                                          top: BorderSide(
+                                            color:
+                                                Colors
+                                                    .white, // 🟠 border only on top
+                                            width: 3,
+                                          ),
+                                        ),
                                         boxShadow: [
                                           BoxShadow(
                                             color: Colors.black26,
-                                            blurRadius: 10,
-                                            offset: const Offset(0, 5),
+                                            blurRadius: 8,
+                                            offset: const Offset(0, 4),
                                           ),
                                         ],
                                       ),
-                                      child: Center(
-                                        child: Text(
-                                          category['title']
-                                              .toString()
-                                              .toUpperCase(),
-                                          textAlign: TextAlign.center,
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 22,
-                                            fontWeight: FontWeight.bold,
-                                            shadows: [
-                                              Shadow(
-                                                color: Colors.black54,
-                                                blurRadius: 6,
-                                                offset: Offset(2, 2),
-                                              ),
-                                            ],
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 19,
+                                        ),
+                                        child: Center(
+                                          child: Text(
+                                            category['title']
+                                                .toString()
+                                                .toUpperCase(),
+                                            textAlign: TextAlign.center,
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 22,
+                                              fontWeight: FontWeight.bold,
+                                              shadows: [
+                                                Shadow(
+                                                  color: Colors.black54,
+                                                  blurRadius: 6,
+                                                  offset: Offset(2, 2),
+                                                ),
+                                              ],
+                                            ),
                                           ),
                                         ),
                                       ),
@@ -263,8 +285,8 @@ class HomeScreen extends ConsumerWidget {
                                 },
                                 child: Container(
                                   margin: const EdgeInsets.only(bottom: 20),
-                                  width: 160,
-                                  height: 160,
+                                  width: 240,
+                                  height: 240,
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
                                     gradient: const LinearGradient(
@@ -277,7 +299,7 @@ class HomeScreen extends ConsumerWidget {
                                     ),
                                     border: Border.all(
                                       width: 4,
-                                      color: Colors.orangeAccent,
+                                      color: Colors.white,
                                     ),
                                   ),
                                   child: Center(
@@ -323,113 +345,6 @@ class HomeScreen extends ConsumerWidget {
                     ),
           ),
         ],
-      ),
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-        child:
-            specials.isEmpty
-                ? const Center(
-                  child: Text(
-                    'No Specials Available',
-                    style: TextStyle(
-                      color: Colors.black54,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                )
-                : SizedBox(
-                  height: 320,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: specials.length,
-                    itemBuilder: (context, index) {
-                      final special = specials[index];
-
-                      if (isSpecialActive(special.toJson())) {
-                        return InkWell(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder:
-                                    (context) => ProductListing(
-                                      categories: [],
-                                      index: 0,
-                                      isSpecial: true,
-                                      special: {"title": special.title},
-                                      products: special.products ?? [],
-                                    ),
-                              ),
-                            );
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 15),
-                            child: Container(
-                              width: 220,
-                              height: 220,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                gradient: const LinearGradient(
-                                  colors: [
-                                    Color(0xFF1C1C1C),
-                                    Color(0xFF0A0A0A),
-                                  ],
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                ),
-                                border: Border.all(
-                                  width: 4,
-                                  color: Colors.orangeAccent,
-                                ),
-                              ),
-                              child: Center(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    // Special Title
-                                    Text(
-                                      special.title ?? "Special Dish",
-                                      textAlign: TextAlign.center,
-                                      style: const TextStyle(
-                                        fontSize: 24,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.orangeAccent,
-                                        letterSpacing: 1.2,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 8),
-                                    // Special Time
-                                    Text(
-                                      "${special.startTime} - ${special.endTime}",
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        color: Colors.white70,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 6),
-                                    // Special Days
-                                    Text(
-                                      _getAvailableDays(special.days ?? {}),
-                                      textAlign: TextAlign.center,
-                                      style: const TextStyle(
-                                        fontSize: 13,
-                                        fontStyle: FontStyle.italic,
-                                        color: Colors.white54,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        );
-                      }
-                      return const SizedBox();
-                    },
-                  ),
-                ),
       ),
     );
   }
