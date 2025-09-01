@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:ipadresto/model/models/product_model.dart';
+import 'package:ipadresto/model/models/special_model.dart'; // Assuming you have this
 
 class ProductDetails extends StatefulWidget {
   final List<ProductModel> products;
   final int initialIndex;
+  final SpecialModel specials; // 👈 pass specials here
 
   const ProductDetails({
     super.key,
     required this.products,
     required this.initialIndex,
+    required this.specials,
   });
 
   @override
@@ -35,11 +38,16 @@ class _ProductDetailsState extends State<ProductDetails> {
       appBar: AppBar(
         backgroundColor: Colors.black,
         elevation: 0,
-        title: SizedBox(
-          height: 60,
-          child: Image.asset("assets/images/logogreydark.png"),
-        ),
         centerTitle: true,
+        toolbarHeight: 80, // 👈 just a little taller than default (56)
+        title: Padding(
+          padding: const EdgeInsets.only(top: 8), // small top spacing
+          child: Image.asset(
+            "assets/images/logogreydark.png",
+            height: 60, // preferred logo height
+            fit: BoxFit.contain,
+          ),
+        ),
       ),
       body: PageView.builder(
         controller: _pageController,
@@ -59,6 +67,7 @@ class _ProductDetailsState extends State<ProductDetails> {
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(height: 25),
@@ -127,25 +136,155 @@ class _ProductDetailsState extends State<ProductDetails> {
                   product.shortDesc ?? "Delicious and freshly prepared!",
                   style: const TextStyle(
                     fontSize: 18,
-                    color: Colors.black87,
+                    color: Colors.white,
                     height: 1.4,
                   ),
                 ),
-                const SizedBox(height: 20),
-
-                /// Long Description / Placeholder
-                Text(
-                  product.desc ??
-                      "This dish is made with the finest ingredients to give you the perfect dining experience. Enjoy the rich taste and aroma!",
-                  style: TextStyle(
-                    fontSize: 17,
-                    color: Colors.grey.shade700,
-                    height: 1.5,
-                  ),
-                ),
+                const SizedBox(height: 10),
               ],
             ),
           ),
+          if (product.verities != null && product.verities!.isNotEmpty) ...[
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 18),
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 6,
+                children:
+                    product.verities!.entries.map((entry) {
+                      return Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 5,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(.2),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.white70, width: 1.5),
+                        ),
+                        child: Text(
+                          "${entry.key}: \$${entry.value}",
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.deepOrange,
+                          ),
+                        ),
+                      );
+                    }).toList(),
+              ),
+            ),
+          ],
+          const SizedBox(height: 30),
+          Divider(color: Colors.white),
+
+          /// Specials Section 👇
+          if (widget.specials.products!.isNotEmpty &&
+              widget.products[widget.initialIndex].isSpecial != true) ...[
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 10,
+                ),
+                child: Text(
+                  "Check out the ${widget.specials.title}!",
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: SizedBox(
+                height: 180,
+                child: ListView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  scrollDirection: Axis.horizontal,
+                  itemCount: widget.specials.products?.length ?? 0,
+                  itemBuilder: (context, index) {
+                    final special = widget.specials.products?[index];
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder:
+                                (context) => ProductDetails(
+                                  products: widget.specials.products ?? [],
+                                  initialIndex: index,
+                                  specials: widget.specials,
+                                ),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        width: 160,
+                        margin: const EdgeInsets.only(right: 12),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade900,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black26,
+                              blurRadius: 6,
+                              offset: Offset(2, 4),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            /// Special Image
+                            ClipRRect(
+                              borderRadius: const BorderRadius.vertical(
+                                top: Radius.circular(16),
+                              ),
+                              child:
+                                  special != null && special!.image != null
+                                      ? CachedNetworkImage(
+                                        imageUrl: special.image!,
+                                        height: 120,
+                                        width: double.infinity,
+                                        fit: BoxFit.cover,
+                                      )
+                                      : Image.asset(
+                                        "assets/images/backupImage.png",
+                                        height: 120,
+                                        width: double.infinity,
+                                        fit: BoxFit.cover,
+                                      ),
+                            ),
+
+                            /// Title
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                special?.name ?? "Special",
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ),
+
+                            /// Time & Days
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+            SizedBox(height: 30),
+          ],
         ],
       ),
     );

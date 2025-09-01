@@ -40,17 +40,17 @@ class HomeScreen extends ConsumerWidget {
           icon: Icon(Icons.sync),
         ),
         actions: [
-          IconButton(
-            icon: Icon(
-              isDark ? Icons.wb_sunny_outlined : Icons.dark_mode_outlined,
-              size: 32,
-              color: isDark ? Colors.yellow : Colors.black,
-            ),
-            onPressed: () {
-              ref.read(themeModeProvider.notifier).state =
-                  isDark ? ThemeMode.light : ThemeMode.dark;
-            },
-          ),
+          // IconButton(
+          //   icon: Icon(
+          //     isDark ? Icons.wb_sunny_outlined : Icons.dark_mode_outlined,
+          //     size: 32,
+          //     color: isDark ? Colors.yellow : Colors.black,
+          //   ),
+          //   onPressed: () {
+          //     ref.read(themeModeProvider.notifier).state =
+          //         isDark ? ThemeMode.light : ThemeMode.dark;
+          //   },
+          // ),
         ],
       ),
       body: Stack(
@@ -142,8 +142,8 @@ class HomeScreen extends ConsumerWidget {
                             Container(
                               padding: EdgeInsets.only(
                                 top: 100,
-                                right: 170,
-                                left: 170,
+                                right: 120,
+                                left: 120,
                                 bottom: 100,
                               ),
                               child: ListView.builder(
@@ -207,7 +207,7 @@ class HomeScreen extends ConsumerWidget {
                                           top: BorderSide(
                                             color:
                                                 Colors
-                                                    .white, // 🟠 border only on top
+                                                    .grey, // 🟠 border only on top
                                             width: 3,
                                           ),
                                         ),
@@ -221,7 +221,7 @@ class HomeScreen extends ConsumerWidget {
                                       ),
                                       child: Padding(
                                         padding: const EdgeInsets.symmetric(
-                                          horizontal: 19,
+                                          horizontal: 10,
                                         ),
                                         child: Center(
                                           child: Text(
@@ -231,7 +231,7 @@ class HomeScreen extends ConsumerWidget {
                                             textAlign: TextAlign.center,
                                             style: const TextStyle(
                                               color: Colors.white,
-                                              fontSize: 22,
+                                              fontSize: 20,
                                               fontWeight: FontWeight.bold,
                                               shadows: [
                                                 Shadow(

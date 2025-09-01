@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ipadresto/controller/providers/shared_preference_fetch.dart';
 import 'package:ipadresto/model/models/product_model.dart';
+import 'package:ipadresto/model/models/special_model.dart';
 import 'package:ipadresto/view/product_details.dart';
 
 class ProductListing extends ConsumerStatefulWidget {
@@ -60,11 +62,16 @@ class _ProductListingState extends ConsumerState<ProductListing>
       appBar: AppBar(
         backgroundColor: Colors.black,
         elevation: 0,
-        title: SizedBox(
-          height: 60,
-          child: Image.asset("assets/images/logogreydark.png"),
-        ),
         centerTitle: true,
+        toolbarHeight: 80, // 👈 just a little taller than default (56)
+        title: Padding(
+          padding: const EdgeInsets.only(top: 8), // small top spacing
+          child: Image.asset(
+            "assets/images/logogreydark.png",
+            height: 60, // preferred logo height
+            fit: BoxFit.contain,
+          ),
+        ),
       ),
       body: Column(
         children: [
@@ -73,7 +80,7 @@ class _ProductListingState extends ConsumerState<ProductListing>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(height: 12),
+                const SizedBox(height: 12),
                 Text(
                   category['title']?.toString().toUpperCase() ?? '',
                   style: const TextStyle(
@@ -82,7 +89,7 @@ class _ProductListingState extends ConsumerState<ProductListing>
                     color: Color(0xFFCE2227),
                   ),
                 ),
-                SizedBox(height: 12),
+                const SizedBox(height: 12),
               ],
             ),
           ),
@@ -108,7 +115,7 @@ class _ProductListingState extends ConsumerState<ProductListing>
               ),
               child: TabBar(
                 controller: _tabController,
-                isScrollable: false, // 🔥 spread evenly
+                isScrollable: false,
                 indicator: BoxDecoration(
                   color: Colors.white.withOpacity(.2),
                   borderRadius: BorderRadius.circular(16),
@@ -234,158 +241,248 @@ class _ProductListingState extends ConsumerState<ProductListing>
     List<ProductModel> currentList,
     int index,
   ) {
-    return InkWell(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder:
-                (_) =>
-                    ProductDetails(products: currentList, initialIndex: index),
-          ),
-        );
-      },
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 16),
-        decoration: BoxDecoration(
-          color: Colors.grey.shade900,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.grey.shade800),
-        ),
-        child: Row(
-          children: [
-            // Image
-            ClipRRect(
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(16),
-                bottomLeft: Radius.circular(16),
-              ),
-              child: SizedBox(
-                width: 120,
-                height: 120,
-                child: _productImage(product.image),
-              ),
-            ),
+    final isAvailable = product.status == "Available";
 
-            // Info
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 12, 12, 12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Name
-                    Text(
-                      product.name.toString().toUpperCase(),
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 6),
-
-                    // Description
-                    Text(
-                      product.shortDesc ?? "",
-                      style: const TextStyle(
-                        fontSize: 13,
-                        color: Colors.white70,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-
-                    const SizedBox(height: 8),
-
-                    // Varieties (🔥 visible + improved style)
-                    if (product.verities != null &&
-                        product.verities!.isNotEmpty) ...[
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 6,
-                        children:
-                            product.verities!.entries.map((entry) {
-                              return Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 5,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.black.withOpacity(.2),
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(
-                                    color: Colors.white70,
-                                    width: 1.5,
-                                  ),
-                                ),
-                                child: Text(
-                                  "${entry.key}: \$${entry.value}",
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.deepOrange,
-                                  ),
-                                ),
-                              );
-                            }).toList(),
-                      ),
-                      const SizedBox(height: 10),
-                    ],
-
-                    // Price & Status
-                    Row(
+    return Consumer(
+      builder: (context, ref, _) {
+        return Opacity(
+          opacity: isAvailable ? 1.0 : 0.5, // Grey out whole card
+          child: InkWell(
+            onTap:
+                isAvailable
+                    ? () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder:
+                              (_) => ProductDetails(
+                                products: currentList,
+                                initialIndex: index,
+                                specials:
+                                    ref
+                                            .watch(fetchProvider)
+                                            .specialsModel
+                                            .isNotEmpty
+                                        ? ref
+                                            .watch(fetchProvider)
+                                            .specialsModel
+                                            .first
+                                        : SpecialModel(),
+                              ),
+                        ),
+                      );
+                    }
+                    : null,
+            child: Stack(
+              children: [
+                Container(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade900,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.grey.shade800),
+                  ),
+                  child: IntrinsicHeight(
+                    // 👈 makes Row take tallest child height
+                    child: Row(
+                      crossAxisAlignment:
+                          CrossAxisAlignment
+                              .stretch, // 👈 ensures children fill height
                       children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 4,
+                        // Image
+                        ClipRRect(
+                          borderRadius: const BorderRadius.only(
+                            topLeft: Radius.circular(16),
+                            bottomLeft: Radius.circular(16),
                           ),
-                          decoration: BoxDecoration(
-                            color: Colors.deepOrange.withOpacity(0.15),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Text(
-                            product.price != null
-                                ? "\$${product.price!.toStringAsFixed(2)}"
-                                : "Price N/A",
-                            style: const TextStyle(
-                              color: Colors.deepOrange,
-                              fontWeight: FontWeight.bold,
+                          child: SizedBox(
+                            width: 120,
+                            child: ColorFiltered(
+                              colorFilter:
+                                  isAvailable
+                                      ? const ColorFilter.mode(
+                                        Colors.transparent,
+                                        BlendMode.multiply,
+                                      )
+                                      : const ColorFilter.mode(
+                                        Colors.grey,
+                                        BlendMode.saturation,
+                                      ),
+                              child: FittedBox(
+                                fit:
+                                    BoxFit
+                                        .cover, // 👈 makes image cover full height
+                                child: _productImage(product.image),
+                              ),
                             ),
                           ),
                         ),
-                        const Spacer(),
-                        Icon(
-                          Icons.circle,
-                          size: 12,
-                          color:
-                              product.status == "Available"
-                                  ? Colors.green
-                                  : Colors.grey,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          product.status ?? "",
-                          style: TextStyle(
-                            color:
-                                product.status == "Available"
-                                    ? Colors.green
-                                    : Colors.grey,
-                            fontSize: 12,
+
+                        // Info
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 12, 12, 12),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Name
+                                Text(
+                                  product.name.toString().toUpperCase(),
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color:
+                                        isAvailable
+                                            ? Colors.white
+                                            : Colors.grey,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 6),
+
+                                // Description
+                                Text(
+                                  product.shortDesc ?? "",
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color:
+                                        isAvailable
+                                            ? Colors.white70
+                                            : Colors.grey.shade600,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+
+                                const SizedBox(height: 8),
+
+                                // Varieties
+                                if (product.verities != null &&
+                                    product.verities!.isNotEmpty) ...[
+                                  Wrap(
+                                    spacing: 8,
+                                    runSpacing: 6,
+                                    children:
+                                        product.verities!.entries.map((entry) {
+                                          return Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 10,
+                                              vertical: 5,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: Colors.black.withOpacity(
+                                                .2,
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                              border: Border.all(
+                                                color: Colors.white70,
+                                                width: 1.5,
+                                              ),
+                                            ),
+                                            child: Text(
+                                              "${entry.key}: \$${entry.value}",
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w600,
+                                                color:
+                                                    isAvailable
+                                                        ? Colors.deepOrange
+                                                        : Colors.grey,
+                                              ),
+                                            ),
+                                          );
+                                        }).toList(),
+                                  ),
+                                  const SizedBox(height: 10),
+                                ],
+
+                                // Price & Status
+                                Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color:
+                                            isAvailable
+                                                ? Colors.deepOrange.withOpacity(
+                                                  0.15,
+                                                )
+                                                : Colors.grey.withOpacity(0.2),
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      child: Text(
+                                        product.price != null
+                                            ? "\$${product.price!.toStringAsFixed(2)}"
+                                            : "Price N/A",
+                                        style: TextStyle(
+                                          color:
+                                              isAvailable
+                                                  ? Colors.deepOrange
+                                                  : Colors.grey,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                    const Spacer(),
+                                    Icon(
+                                      Icons.circle,
+                                      size: 12,
+                                      color:
+                                          isAvailable
+                                              ? Colors.green
+                                              : Colors.grey,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      product.status ?? "",
+                                      style: TextStyle(
+                                        color:
+                                            isAvailable
+                                                ? Colors.green
+                                                : Colors.grey,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ],
                     ),
-                  ],
+                  ),
                 ),
-              ),
+
+                // Overlay "Not Available"
+                if (!isAvailable)
+                  Positioned.fill(
+                    child: Container(
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.4),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: const Text(
+                        "NOT AVAILABLE",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.redAccent,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
