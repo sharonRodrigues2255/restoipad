@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ipadresto/controller/providers/shared_preference_fetch.dart';
-import 'package:ipadresto/shared/providers/theme_providers.dart';
 import 'package:ipadresto/view/product_listing.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:url_launcher/url_launcher.dart' show launchUrl;
 
 const Color kButtonColor = Color(0xFFC09A5D);
 const Color kTextColor = Color(0xFF9C7147);
@@ -20,16 +21,6 @@ class HomeScreen extends ConsumerWidget {
 
     final specials = fetchController.specialsModel;
     final categories = fetchController.categoryModel;
-    final themeMode = ref.watch(themeModeProvider);
-
-    // Check if dark mode is active
-    final isDark =
-        themeMode == ThemeMode.dark ||
-        (themeMode == ThemeMode.system &&
-            MediaQuery.of(context).platformBrightness == Brightness.dark);
-
-    final bgImage =
-        isDark ? "assets/images/dark_bg.png" : "assets/images/light_bg.png";
 
     return Scaffold(
       appBar: AppBar(
@@ -344,22 +335,17 @@ class HomeScreen extends ConsumerWidget {
                           }).toList(),
                     ),
           ),
+          Positioned(
+            right: 2,
+            bottom: 2,
+            child: ElevatedButton(
+              onPressed: _launchPrivacyPolicy,
+              child: Text('Privacy Policy'),
+            ),
+          ),
         ],
       ),
     );
-  }
-
-  // Utility to check time range
-  bool _isTimeInRange(TimeOfDay now, TimeOfDay start, TimeOfDay end) {
-    final nowMinutes = now.hour * 60 + now.minute;
-    final startMinutes = start.hour * 60 + start.minute;
-    final endMinutes = end.hour * 60 + end.minute;
-    if (startMinutes <= endMinutes) {
-      return nowMinutes >= startMinutes && nowMinutes <= endMinutes;
-    } else {
-      // Time range spans midnight
-      return nowMinutes >= startMinutes || nowMinutes <= endMinutes;
-    }
   }
 }
 
@@ -446,4 +432,17 @@ bool isSpecialActive(Map<String, dynamic> special) {
 
   // 4. Check if now is within the range
   return now.isAfter(startTime) && now.isBefore(endTime);
+}
+
+final Uri _privacyPolicyUrl = Uri.parse(
+  'https://curryislandindiankitchen.com/privacy-policy/',
+);
+
+Future<void> _launchPrivacyPolicy() async {
+  if (!await launchUrl(
+    _privacyPolicyUrl,
+    mode: LaunchMode.externalApplication,
+  )) {
+    throw 'Could not launch $_privacyPolicyUrl';
+  }
 }
