@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:ipadresto/model/models/product_model.dart';
-import 'package:ipadresto/model/models/special_model.dart'; // Assuming you have this
+import 'package:ipadresto/model/models/special_model.dart';
+import 'package:ipadresto/view/home_screen.dart'; // Assuming you have this
 
 class ProductDetails extends StatefulWidget {
   final List<ProductModel> products;
@@ -180,7 +181,8 @@ class _ProductDetailsState extends State<ProductDetails> {
 
           /// Specials Section 👇
           if (widget.specials.products!.isNotEmpty &&
-              widget.products[widget.initialIndex].isSpecial != true) ...[
+              widget.products[widget.initialIndex].isSpecial != true &&
+              isSpecialActive(widget.specials.toJson())) ...[
             Align(
               alignment: Alignment.centerLeft,
               child: Padding(
