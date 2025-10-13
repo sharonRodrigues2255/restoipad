@@ -122,7 +122,7 @@ class _ProductDetailsState extends State<ProductDetails> {
                 /// Price
                 Text(
                   product.price != null
-                      ? "₹${product.price!.toStringAsFixed(2)}"
+                      ? "\$${product.price!.toStringAsFixed(2)}"
                       : "Price Unavailable",
                   style: const TextStyle(
                     fontSize: 24,
@@ -176,7 +176,35 @@ class _ProductDetailsState extends State<ProductDetails> {
               ),
             ),
           ],
-          const SizedBox(height: 30),
+          const SizedBox(height: 20),
+
+          // Divider(color: Colors.white),
+          const SizedBox(height: 10),
+          Center(
+            child: Column(
+              children: [
+                Text(
+                  "Advisory",
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  "Some of our dishes contains nuts and other allergens Please let your server know if you have any allergies or\nany dietary preference?request.",
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey,
+                    height: 1.4,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 10),
           Divider(color: Colors.white),
 
           /// Specials Section 👇

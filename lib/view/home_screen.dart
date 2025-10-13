@@ -31,17 +31,6 @@ class HomeScreen extends ConsumerWidget {
           icon: Icon(Icons.sync),
         ),
         actions: [
-          // IconButton(
-          //   icon: Icon(
-          //     isDark ? Icons.wb_sunny_outlined : Icons.dark_mode_outlined,
-          //     size: 32,
-          //     color: isDark ? Colors.yellow : Colors.black,
-          //   ),
-          //   onPressed: () {
-          //     ref.read(themeModeProvider.notifier).state =
-          //         isDark ? ThemeMode.light : ThemeMode.dark;
-          //   },
-          // ),
         ],
       ),
       body: Stack(
